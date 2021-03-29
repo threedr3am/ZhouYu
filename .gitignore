@@ -1,0 +1,14 @@
+/build/
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
+.DS_Store
+out/
+/gradlew.bat
+/gradle
+/gradlew
+**/build
+**/*.jar
+.gradle

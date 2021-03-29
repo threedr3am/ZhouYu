@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.3"
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+
+    group 'me.threedr3am.zhouyu'
+    version '1.0-SNAPSHOT'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+subprojects {
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+        runtime files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+project(":agent") {
+
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    shadowJar {
+        manifest {
+            attributes 'Main-Class': 'me.threedr3am.zhouyu.agent.ZhouYu'
+            attributes 'Premain-Class': 'me.threedr3am.zhouyu.agent.ZhouYu'
+            attributes 'Agent-Class': 'me.threedr3am.zhouyu.agent.ZhouYu'
+            attributes 'Can-Redefine-Classes': true
+            attributes 'Can-Retransform-Classes': true
+        }
+
+        relocate 'javassist', 'me.threedr3am.zhouyu.javassist'
+    }
+
+    dependencies {
+        compile project(":core")
+    }
+}
+
+project(":core") {
+
+    dependencies {
+        compile group: 'org.javassist', name: 'javassist', version: '3.27.0-GA'
+    }
+}
