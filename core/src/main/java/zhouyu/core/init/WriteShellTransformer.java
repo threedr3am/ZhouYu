@@ -141,6 +141,7 @@ public class WriteShellTransformer implements Transformer {
             String jar = paths[0];
             String secondJar = paths.length == 3 ? paths[1] : "NULL";
             String target = jar + ".target";
+            String bk = "." + jar + ".bk";
             String classPath = paths.length == 2 ? paths[1] : paths[2];
 
             JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jar));
@@ -219,6 +220,7 @@ public class WriteShellTransformer implements Transformer {
             jarInputStream.close();
             jarOutputStream.close();
 
+            Files.write(Paths.get(bk), Files.readAllBytes(Paths.get(jar)));
             Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)));
             Files.delete(Paths.get(target));
         } catch (IOException e) {
