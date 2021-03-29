@@ -1,10 +1,7 @@
-package me.threedr3am.zhouyu.agent;
+package zhouyu.agent;
 
 import java.io.IOException;
 
-/**
- * @author threedr3am
- */
 public class ExpGen {
 
     public static void main(String[] args) throws IOException {

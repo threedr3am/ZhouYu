@@ -1,4 +1,4 @@
-package me.threedr3am.zhouyu.core.config;
+package zhouyu.core.config;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -6,9 +6,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author threedr3am
- */
 public class Config {
 
     private static Config config;

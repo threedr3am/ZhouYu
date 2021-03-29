@@ -1,4 +1,4 @@
-package me.threedr3am.zhouyu.core.util;
+package zhouyu.core.util;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,9 +7,6 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 
-/**
- * @author threedr3am
- */
 public class JavassistUtil {
 
     public static Set<CtMethod> getAllMethods(CtClass ctClass) {

@@ -1,4 +1,4 @@
-package me.threedr3am.zhouyu.core.init;
+package zhouyu.core.init;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,12 +19,9 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
-import me.threedr3am.zhouyu.core.transformer.Transformer;
-import me.threedr3am.zhouyu.core.util.JavassistUtil;
+import zhouyu.core.transformer.Transformer;
+import zhouyu.core.util.JavassistUtil;
 
-/**
- * @author threedr3am
- */
 public class WriteShellTransformer implements Transformer {
 
     private String[][] methods = new String[][] {

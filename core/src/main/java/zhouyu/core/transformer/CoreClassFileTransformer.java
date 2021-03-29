@@ -1,4 +1,4 @@
-package me.threedr3am.zhouyu.core.transformer;
+package zhouyu.core.transformer;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -9,12 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import me.threedr3am.zhouyu.core.init.ProtectTransformer;
-import me.threedr3am.zhouyu.core.init.WriteShellTransformer;
+import zhouyu.core.init.ProtectTransformer;
+import zhouyu.core.init.WriteShellTransformer;
 
-/**
- * @author threedr3am
- */
 public class CoreClassFileTransformer implements ClassFileTransformer {
 
     private Instrumentation inst;

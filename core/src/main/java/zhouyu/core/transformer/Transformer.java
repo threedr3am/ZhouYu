@@ -1,8 +1,5 @@
-package me.threedr3am.zhouyu.core.transformer;
+package zhouyu.core.transformer;
 
-/**
- * @author threedr3am
- */
 public interface Transformer {
 
     boolean condition(String className);

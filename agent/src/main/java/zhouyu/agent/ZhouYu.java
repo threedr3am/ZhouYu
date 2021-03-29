@@ -1,4 +1,4 @@
-package me.threedr3am.zhouyu.agent;
+package zhouyu.agent;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
@@ -6,12 +6,9 @@ import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import me.threedr3am.zhouyu.core.config.Config;
-import me.threedr3am.zhouyu.core.transformer.CoreClassFileTransformer;
+import zhouyu.core.config.Config;
+import zhouyu.core.transformer.CoreClassFileTransformer;
 
-/**
- * @author threedr3am
- */
 public class ZhouYu {
 
     public static void premain(String agentArg, Instrumentation inst) {

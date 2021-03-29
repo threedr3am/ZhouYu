@@ -1,14 +1,11 @@
-package me.threedr3am.zhouyu.core.init;
+package zhouyu.core.init;
 
 import java.io.ByteArrayInputStream;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.LoaderClassPath;
-import me.threedr3am.zhouyu.core.transformer.Transformer;
+import zhouyu.core.transformer.Transformer;
 
-/**
- * @author threedr3am
- */
 public class ProtectTransformer implements Transformer {
 
     @Override
