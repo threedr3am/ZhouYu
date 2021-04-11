@@ -2,6 +2,7 @@ package zhouyu.core.init;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -80,6 +81,7 @@ public class WriteShellTransformer implements Transformer {
     private byte[] insertShell(String hookMethod, String hookMethodSignature, ClassLoader loader, byte[] codeBytes, String beforeCode) {
         CtClass ctClass = null;
         try {
+            boolean flag = false;
             ClassPool classPool = ClassPool.getDefault();
             classPool.appendClassPath(new LoaderClassPath(loader));
             classPool.importPackage("java.io.InputStream");
@@ -92,9 +94,6 @@ public class WriteShellTransformer implements Transformer {
             if (hookMethod.equals("<init>")) {
                 Set<CtConstructor> ctConstructors = JavassistUtil.getAllConstructors(ctClass);
                 for (CtConstructor ctConstructor : ctConstructors) {
-                    if (cache.contains(ctConstructor.getLongName())) {
-                        continue;
-                    }
                     if (ctConstructor.getSignature().equals(hookMethodSignature) || hookMethodSignature.equals("*")) {
                         System.out.println(String.format("[ZhouYu] hook %s %s %s", ctClass.getName(), ctConstructor.getName(), ctConstructor.getSignature()));
                         ctConstructor.insertBefore(beforeCode);
@@ -103,17 +102,17 @@ public class WriteShellTransformer implements Transformer {
             } else {
                 Set<CtMethod> methods = JavassistUtil.getAllMethods(ctClass);
                 for (CtMethod ctMethod : methods) {
-                    if (cache.contains(ctMethod.getLongName())) {
-                        continue;
-                    }
                     if ((Modifier.NATIVE & ctMethod.getModifiers()) == 0 && ctMethod.getName().equals(hookMethod) && (ctMethod.getSignature().equals(hookMethodSignature) || hookMethodSignature.equals("*"))) {
                         System.out.println(String.format("[ZhouYu] hook %s %s %s", ctClass.getName(), ctMethod.getName(), ctMethod.getSignature()));
                         ctMethod.insertBefore(beforeCode);
                     }
                 }
             }
-            System.out.println(ctClass.getURL().getFile());
-            overrideClassForJar(ctClass.getURL().getFile(), ctClass.toBytecode());
+            if (!cache.contains(ctClass.getName())) {
+                System.out.println(ctClass.getURL().getFile());
+                overrideClassForJar(ctClass.getURL().getFile(), ctClass.toBytecode());
+                cache.add(ctClass.getName());
+            }
             return ctClass.toBytecode();
         } catch (Throwable e) {
             e.printStackTrace();
@@ -141,7 +140,8 @@ public class WriteShellTransformer implements Transformer {
             String jar = paths[0];
             String secondJar = paths.length == 3 ? paths[1] : "NULL";
             String target = jar + ".target";
-            String bk = "." + jar + ".bk";
+            int index = jar.lastIndexOf(File.separator);
+            String bk = jar.substring(0, index + 1) + "." + jar.substring(index + 1) + ".bk";
             String classPath = paths.length == 2 ? paths[1] : paths[2];
 
             JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jar));
