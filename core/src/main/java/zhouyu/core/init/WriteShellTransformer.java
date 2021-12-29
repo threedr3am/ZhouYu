@@ -228,6 +228,7 @@ public class WriteShellTransformer implements Transformer {
             Files.write(Paths.get(bk), Files.readAllBytes(Paths.get(jar)));
             Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)), StandardOpenOption.WRITE);
             Files.delete(Paths.get(target));
+            System.out.println("替换" + jar + "完成，使用结束记得删除它哦！原有jar已备份为" + bk);
         } catch (IOException e) {
             e.printStackTrace();
         }
