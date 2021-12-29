@@ -2,7 +2,7 @@
 
 ### ZhouYu -> 周瑜
 
-Java - SpringBoot 持久化 WebShell
+Java - SpringBoot 持久化 WebShell（适配任何符合JavaEE规范的服务）
 
 背景：后Spring时代，SpringBoot jar部署模式下，一般没有了JSP，所有的模板都在jar内，当大家都热衷于内存马的时候，发现很容易被查杀（网上查杀方式无外乎都是利用JVMTI重加载class的javaagent方式），并且重启后丢失！
 
