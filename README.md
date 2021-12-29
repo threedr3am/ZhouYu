@@ -21,7 +21,7 @@ gradle :agent:shadowJar
 ./gradlew :agent:shadowJar
 ```
 
-编译后得到 agent/build/libs/agent-xxx.jar，即ZhouYu.jar
+编译后得到 agent/build/libs/agent-1.0-SNAPSHOT-all.jar，即ZhouYu.jar
 
 ### 二、使用方式
 
@@ -48,6 +48,11 @@ try {
 } catch (Throwable throwable) {
 
 }
+```
+
+3. 执行命令
+```
+curl -XGET "http://127.0.0.1:8080?cmd=whoami"
 ```
 
 ### WARNNING

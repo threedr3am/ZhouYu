@@ -1,6 +1,5 @@
 package zhouyu.core.init;
 
-import java.io.ByteArrayInputStream;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.LoaderClassPath;
@@ -23,8 +22,8 @@ public class ProtectTransformer implements Transformer {
         try {
             ClassPool classPool = ClassPool.getDefault();
             classPool.appendClassPath(new LoaderClassPath(loader));
-            ctClass = classPool.makeClass(new ByteArrayInputStream(codeBytes));
-            if (check0(className, ctClass)) {
+            ctClass = classPool.get(className.replace("/", "."));
+            if (ctClass != null && check0(className, ctClass)) {
                 return new byte[0];
             }
         } catch (Throwable e) {
