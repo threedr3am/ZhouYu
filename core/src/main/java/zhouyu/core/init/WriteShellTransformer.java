@@ -147,11 +147,14 @@ public class WriteShellTransformer implements Transformer {
             int count;
             JarEntry jarEntry;
             JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jar));
-            Manifest manifest = getManifest(jarInputStream);
+            Manifest manifest = getManifest(new JarInputStream(new FileInputStream(jar)));
             JarOutputStream jarOutputStream = manifest == null ?
                 new JarOutputStream(new FileOutputStream(target))
                 : new JarOutputStream(new FileOutputStream(target), manifest);
             while((jarEntry = jarInputStream.getNextJarEntry()) != null) {
+                if (jarEntry.getName().equals("META-INF/MANIFEST.MF")) {
+                    continue;
+                }
                 if (jarEntry.getName().equals(secondJar)) {
                     System.out.println(String.format("替换jar: %s", jarEntry.getName()));
                     ByteArrayOutputStream readByteArrayOutputStream = new ByteArrayOutputStream();
@@ -159,13 +162,16 @@ public class WriteShellTransformer implements Transformer {
                         readByteArrayOutputStream.write(bytes, 0, count);
                     }
                     JarInputStream jarInputStream2 = new JarInputStream(new ByteArrayInputStream(readByteArrayOutputStream.toByteArray()));
-                    manifest = getManifest(jarInputStream2);
+                    manifest = getManifest(new JarInputStream(new ByteArrayInputStream(readByteArrayOutputStream.toByteArray())));
                     ByteArrayOutputStream writeByteArrayOutputStream = new ByteArrayOutputStream();
                     JarOutputStream jarOutputStream2 = manifest == null ?
                         new JarOutputStream(writeByteArrayOutputStream)
                         : new JarOutputStream(writeByteArrayOutputStream, manifest);
                     JarEntry jarEntry2;
                     while((jarEntry2 = jarInputStream2.getNextJarEntry()) != null) {
+                        if (jarEntry2.getName().equals("META-INF/MANIFEST.MF")) {
+                            continue;
+                        }
                         if (jarEntry2.getName().equals(classPath)) {
                             JarEntry newJarEntry = new JarEntry(jarEntry2.getName());
                             newJarEntry.setMethod(JarEntry.STORED);
@@ -226,7 +232,7 @@ public class WriteShellTransformer implements Transformer {
             jarOutputStream.close();
 
             Files.write(Paths.get(bk), Files.readAllBytes(Paths.get(jar)));
-            Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)), StandardOpenOption.WRITE);
+            Files.write(Paths.get(jar), Files.readAllBytes(Paths.get(target)));
             Files.delete(Paths.get(target));
             System.out.println("替换" + jar + "完成，使用结束记得删除它哦！原有jar已备份为" + bk);
         } catch (IOException e) {
@@ -249,11 +255,13 @@ public class WriteShellTransformer implements Transformer {
                     }
                     manifest = new Manifest();
                     manifest.read(new ByteArrayInputStream(readByteArrayOutputStream.toByteArray()));
+                    break;
                 }
             }
         } else {
             manifest = jarInputStream.getManifest();
         }
+        jarInputStream.close();
         return manifest;
     }
 }
